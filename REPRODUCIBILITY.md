@@ -32,3 +32,61 @@ Built-up = class 1; other three classes are Non-built-up for binary change. Comm
 3. exact OSM extraction/download date and source;
 4. exact `pip freeze` from the original final environment, if still available;
 5. original 8-band feature-stack-generation code, if available.
+
+
+## Sentinel-2 robustness workflow
+
+The cross-sensor extension uses the same eight spectral predictors as the main PlanetScope comparison space:
+
+```text
+Blue, Green, Red, NIR, NDVI, NDWI, GNDVI, Brightness
+```
+
+SWIR-derived predictors are intentionally excluded so the comparison does not gain additional Sentinel-2-only spectral information.
+
+Sentinel-2 sample adaptation rules:
+
+- preserve previously interpreted class labels;
+- retain original training polygons only if at least one valid native 10 m pixel center falls inside;
+- 10 additional 30 × 30 m training polygons per class/year;
+- each augmented polygon is exactly 3 × 3 Sentinel-2 pixels;
+- selected augmentation references must have all 9 valid pixels;
+- minimum distance from a different-class original training polygon: 10 m;
+- minimum spacing among augmented centers: 40 m;
+- augmentation source points are excluded from the validation holdout;
+- final holdout: 40 points per class/year;
+- minimum validation-to-final-training distance: 50 m;
+- minimum spacing among validation points: 30 m;
+- samples marked `CHECK_RGB` require visual verification against source imagery.
+
+The exact `OrigRef_ID` selections used by the reported analysis are explicitly archived in notebook 12 to make the sampling decision reproducible.
+
+Sentinel-2 RF settings:
+
+- grouped CV folds: 5
+- CV trees: 120
+- final trees: 700
+- `max_features="sqrt"`
+- `max_depth=None`
+- `min_samples_leaf=1`
+- `class_weight="balanced_subsample"`
+- bootstrap: True
+- random seed: 42
+- maximum training pixels per polygon: 100
+
+## Cross-sensor common-domain harmonization
+
+Notebook 14:
+
+1. reads the exact final frozen/context-corrected PlanetScope class maps and the final Sentinel-2 class maps;
+2. intersects all four raster footprints;
+3. builds one 10 m EPSG:32645 comparison grid;
+4. aggregates PlanetScope 3 m categories to 10 m with categorical `mode`;
+5. aligns Sentinel-2 with nearest-neighbour resampling;
+6. keeps only cells valid in all four maps;
+7. removes the common river/sandbar exclusion (`non-zero = excluded`);
+8. computes class areas and built-up change on exactly the same cells;
+9. reports four-class pixel agreement, Built-up IoU/Jaccard and Dice agreement; and
+10. writes the exact input paths and harmonization settings to `Cross_Sensor_Input_Provenance.json`.
+
+The resulting 10 m PlanetScope values are **comparison-only** and do not replace the native 3 m PlanetScope manuscript results.

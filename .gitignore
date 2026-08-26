@@ -35,3 +35,6 @@ Outputs/**
 !Samples/README.md
 !Data/README.md
 !Data/Road_Network/README.md
+
+# Keep the small derived Sentinel-2 reference package used for reproducibility
+!Samples/Sentinel2_RF_Samples_Adapted.gpkg

@@ -1,6 +1,6 @@
 # Rajshahi Urban Expansion — PlanetScope 2018–2026
 
-Reproducible analysis code for the manuscript **Fine-Resolution Assessment of Land Use/Land Cover Change, Urban Expansion Types, Growth Hotspots and Road Proximity in Rajshahi City Using PlanetScope Imagery (2018–2026)**.
+Reproducible analysis code for the manuscript **Fine-Resolution Analysis of Urban Expansion Morphology, Growth Hotspots, and Road Proximity in Rajshahi City Using PlanetScope Imagery with Sentinel-2 Cross-Sensor Robustness Assessment (2018–2026)**.
 
 ## What is included
 
@@ -47,6 +47,13 @@ The context-correction workflow uses a separate **500-tree auxiliary binary wate
 09_Urban_Growth_Hotspot_GiStar_500m.ipynb
 10_Road_Proximity_Analysis_Current_OSM.ipynb
 11_Final_Results_Summary.ipynb
+
+# Sentinel-2 cross-sensor robustness extension
+gee/01_GEE_Sentinel2_Seasonal_Export_2018_2026.js
+12_Sentinel2_Training_Validation_Preparation.ipynb
+[VISUALLY REVIEW CHECK_RGB SAMPLES AGAINST SOURCE/RGB]
+13_Sentinel2_RF_Classification_2018_2026.ipynb
+14_PlanetScope_vs_Sentinel2_Common_Domain_Comparison.ipynb
 ```
 
 ## Environment
@@ -64,3 +71,23 @@ pip install -r requirements.txt
 Set `RAJSHAHI_PROJECT_ROOT` to the local analysis root when using the original folder structure. If it is not set, notebooks attempt to use the repository root.
 
 See `DATA_REQUIREMENTS.md`, `REPRODUCIBILITY.md`, and `GITHUB_UPLOAD_STEPS.md` before public release.
+
+
+## Sentinel-2 cross-sensor robustness extension
+
+The Sentinel-2 analysis is a **secondary robustness assessment**, not a replacement for the native 3 m PlanetScope workflow.
+
+Final design:
+
+- source: `COPERNICUS/S2_SR_HARMONIZED`;
+- common seasonal window: 1 March–30 April for both 2018 and 2026;
+- SCL pixel masking removes no-data, defective, cloud-shadow, medium/high cloud, cirrus and snow/ice classes;
+- exported bands: Blue, Green, Red and NIR at 10 m in EPSG:32645;
+- predictor parity: Blue, Green, Red, NIR, NDVI, NDWI, GNDVI and Brightness;
+- separate year-specific Random Forest models with 700 final trees;
+- adapted reference samples are archived in `Samples/Sentinel2_RF_Samples_Adapted.gpkg`;
+- final comparison uses the exact same 10 m valid cells and the common river/sandbar exclusion;
+- PlanetScope is aggregated to 10 m by categorical mode; Sentinel-2 is aligned with nearest-neighbour resampling;
+- the common-domain notebook writes `Cross_Sensor_Input_Provenance.json` so the exact four class-map inputs and river mask are auditable.
+
+Do not interpret Sentinel-2 holdout accuracy as directly superior/inferior to the PlanetScope final independent accuracy because the reference-sample designs and native spatial resolutions differ.
