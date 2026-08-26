@@ -1,0 +1,18 @@
+name: rajshahi-urban-expansion
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy
+  - pandas
+  - matplotlib
+  - rasterio
+  - geopandas
+  - pyogrio
+  - shapely
+  - scipy
+  - scikit-learn
+  - joblib
+  - openpyxl
+  - jupyter
+  - ipykernel
